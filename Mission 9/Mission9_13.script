@@ -1,0 +1,211 @@
+%  Script Mission - Hohmann Transfer Example
+%
+%  This script demonstrates how to target a Hohmann Transfer
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft DefaultSC;
+GMAT DefaultSC.DateFormat = UTCGregorian;
+GMAT DefaultSC.Epoch = '08 Oct 2023 00:00:00.000';
+GMAT DefaultSC.CoordinateSystem = EarthMJ2000Eq;
+GMAT DefaultSC.DisplayStateType = ModifiedKeplerian;
+GMAT DefaultSC.RadPer = 6630.136299999995;
+GMAT DefaultSC.RadApo = 6810.136299999987;
+GMAT DefaultSC.INC = 5.059999999999941;
+GMAT DefaultSC.RAAN = 0;
+GMAT DefaultSC.AOP = 0;
+GMAT DefaultSC.TA = 0;
+GMAT DefaultSC.DryMass = 4527;
+GMAT DefaultSC.Cd = 2.14;
+GMAT DefaultSC.Cr = 1.22;
+GMAT DefaultSC.DragArea = 7.8;
+GMAT DefaultSC.SRPArea = 13.1;
+GMAT DefaultSC.SPADDragScaleFactor = 1;
+GMAT DefaultSC.SPADSRPScaleFactor = 1;
+GMAT DefaultSC.AtmosDensityScaleFactor = 1;
+GMAT DefaultSC.ExtendedMassPropertiesModel = 'None';
+GMAT DefaultSC.NAIFId = -10004001;
+GMAT DefaultSC.NAIFIdReferenceFrame = -9004001;
+GMAT DefaultSC.OrbitColor = Red;
+GMAT DefaultSC.TargetColor = Teal;
+GMAT DefaultSC.OrbitErrorCovariance = [ 1e+70 0 0 0 0 0 ; 0 1e+70 0 0 0 0 ; 0 0 1e+70 0 0 0 ; 0 0 0 1e+70 0 0 ; 0 0 0 0 1e+70 0 ; 0 0 0 0 0 1e+70 ];
+GMAT DefaultSC.CdSigma = 1e+70;
+GMAT DefaultSC.CrSigma = 1e+70;
+GMAT DefaultSC.Id = 'SatId';
+GMAT DefaultSC.Attitude = CoordinateSystemFixed;
+GMAT DefaultSC.SPADSRPInterpolationMethod = Bilinear;
+GMAT DefaultSC.SPADSRPScaleFactorSigma = 1e+70;
+GMAT DefaultSC.SPADDragInterpolationMethod = Bilinear;
+GMAT DefaultSC.SPADDragScaleFactorSigma = 1e+70;
+GMAT DefaultSC.AtmosDensityScaleFactorSigma = 1e+70;
+GMAT DefaultSC.ModelFile = 'aura.3ds';
+GMAT DefaultSC.ModelOffsetX = 0;
+GMAT DefaultSC.ModelOffsetY = 0;
+GMAT DefaultSC.ModelOffsetZ = 0;
+GMAT DefaultSC.ModelRotationX = 0;
+GMAT DefaultSC.ModelRotationY = 0;
+GMAT DefaultSC.ModelRotationZ = 0;
+GMAT DefaultSC.ModelScale = 1;
+GMAT DefaultSC.AttitudeDisplayStateType = 'Quaternion';
+GMAT DefaultSC.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT DefaultSC.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT DefaultSC.EulerAngleSequence = '321';
+
+
+
+
+
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create ForceModel DefaultProp_ForceModel;
+GMAT DefaultProp_ForceModel.CentralBody = Earth;
+GMAT DefaultProp_ForceModel.PrimaryBodies = {Earth};
+GMAT DefaultProp_ForceModel.Drag = None;
+GMAT DefaultProp_ForceModel.SRP = Off;
+GMAT DefaultProp_ForceModel.RelativisticCorrection = Off;
+GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 4;
+GMAT DefaultProp_ForceModel.GravityField.Earth.StmLimit = 100;
+GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT DefaultProp_ForceModel.GravityField.Earth.TideModel = 'None';
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator DefaultProp;
+GMAT DefaultProp.FM = DefaultProp_ForceModel;
+GMAT DefaultProp.Type = RungeKutta89;
+GMAT DefaultProp.InitialStepSize = 60;
+GMAT DefaultProp.Accuracy = 9.999999999999999e-12;
+GMAT DefaultProp.MinStep = 0.001;
+GMAT DefaultProp.MaxStep = 2700;
+GMAT DefaultProp.MaxStepAttempts = 50;
+GMAT DefaultProp.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Burns
+%----------------------------------------
+
+Create ImpulsiveBurn TOI;
+GMAT TOI.CoordinateSystem = Local;
+GMAT TOI.Origin = Earth;
+GMAT TOI.Axes = VNB;
+GMAT TOI.Element1 = 0;
+GMAT TOI.Element2 = 0;
+GMAT TOI.Element3 = 0;
+GMAT TOI.DecrementMass = false;
+GMAT TOI.Isp = 300;
+GMAT TOI.GravitationalAccel = 9.81;
+
+Create ImpulsiveBurn GOI;
+GMAT GOI.CoordinateSystem = Local;
+GMAT GOI.Origin = Earth;
+GMAT GOI.Axes = VNB;
+GMAT GOI.Element1 = 0;
+GMAT GOI.Element2 = 0;
+GMAT GOI.Element3 = 0;
+GMAT GOI.DecrementMass = false;
+GMAT GOI.Isp = 300;
+GMAT GOI.GravitationalAccel = 9.81;
+
+%----------------------------------------
+%---------- Solvers
+%----------------------------------------
+
+Create DifferentialCorrector DC;
+GMAT DC.ShowProgress = true;
+GMAT DC.ReportStyle = Normal;
+GMAT DC.ReportFile = 'DifferentialCorrectorDC.data';
+GMAT DC.MaximumIterations = 25;
+GMAT DC.DerivativeMethod = ForwardDifference;
+GMAT DC.Algorithm = NewtonRaphson;
+
+%----------------------------------------
+%---------- Plots/Reports
+%----------------------------------------
+
+Create OrbitView OpenGLPlot1;
+GMAT OpenGLPlot1.SolverIterations = Current;
+GMAT OpenGLPlot1.UpperLeft = [ 0.1765625 0.2508333333333334 ];
+GMAT OpenGLPlot1.Size = [ 0.6322916666666667 0.6875 ];
+GMAT OpenGLPlot1.RelativeZOrder = 92;
+GMAT OpenGLPlot1.Maximized = false;
+GMAT OpenGLPlot1.Add = {Earth, DefaultSC};
+GMAT OpenGLPlot1.CoordinateSystem = EarthMJ2000Eq;
+GMAT OpenGLPlot1.DrawObject = [ true true ];
+GMAT OpenGLPlot1.DataCollectFrequency = 1;
+GMAT OpenGLPlot1.UpdatePlotFrequency = 50;
+GMAT OpenGLPlot1.NumPointsToRedraw = 0;
+GMAT OpenGLPlot1.ShowPlot = true;
+GMAT OpenGLPlot1.MaxPlotPoints = 20000;
+GMAT OpenGLPlot1.ShowLabels = true;
+GMAT OpenGLPlot1.ViewPointReference = Earth;
+GMAT OpenGLPlot1.ViewPointVector = [ 0 0 30000 ];
+GMAT OpenGLPlot1.ViewDirection = Earth;
+GMAT OpenGLPlot1.ViewScaleFactor = 5;
+GMAT OpenGLPlot1.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT OpenGLPlot1.ViewUpAxis = Z;
+GMAT OpenGLPlot1.EclipticPlane = Off;
+GMAT OpenGLPlot1.XYPlane = On;
+GMAT OpenGLPlot1.WireFrame = Off;
+GMAT OpenGLPlot1.Axes = On;
+GMAT OpenGLPlot1.Grid = Off;
+GMAT OpenGLPlot1.SunLine = Off;
+GMAT OpenGLPlot1.UseInitialView = On;
+GMAT OpenGLPlot1.StarCount = 7000;
+GMAT OpenGLPlot1.EnableStars = On;
+GMAT OpenGLPlot1.EnableConstellations = On;
+
+Create ReportFile DefaultReportFile;
+GMAT DefaultReportFile.SolverIterations = Current;
+GMAT DefaultReportFile.UpperLeft = [ 0 0 ];
+GMAT DefaultReportFile.Size = [ 0 0 ];
+GMAT DefaultReportFile.RelativeZOrder = 0;
+GMAT DefaultReportFile.Maximized = false;
+GMAT DefaultReportFile.Filename = 'DefaultReportFile.txt';
+GMAT DefaultReportFile.Precision = 16;
+GMAT DefaultReportFile.WriteHeaders = true;
+GMAT DefaultReportFile.LeftJustify = On;
+GMAT DefaultReportFile.ZeroFill = Off;
+GMAT DefaultReportFile.FixedWidth = true;
+GMAT DefaultReportFile.Delimiter = ' ';
+GMAT DefaultReportFile.ColumnWidth = 23;
+GMAT DefaultReportFile.WriteReport = true;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable DV;
+GMAT DV = 0;
+
+
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+BeginMissionSequence;
+
+Propagate 'Prop' DefaultProp(DefaultSC) {DefaultSC.Earth.Apoapsis, OrbitColor = [54 255 6]};
+
+% Burn in the velocity direction to reach an alternate Apoapsis point
+Target 'Raise and Circularize' DC {SolveMode = Solve, ExitMode = DiscardAndContinue, ShowProgressWindow = true};
+   Vary 'Vary TOI.V' DC(TOI.Element1 = 0.5, {Perturbation = 0.0001, Lower = 0, Upper = 3.14159, MaxStep = 0.2, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+   Maneuver 'Apply TOI' TOI(DefaultSC);
+   Propagate 'Prop to Apogee' DefaultProp(DefaultSC) {DefaultSC.Apoapsis, OrbitColor = [0 0 254]};
+   Achieve 'Achieve RMAG' DC(DefaultSC.Earth.RMAG = 42164, {Tolerance = 0.1});
+   Vary 'Vary GOI.V' DC(GOI.Element1 = 0.5, {Perturbation = 0.0001, Lower = 0, Upper = 3.14159, MaxStep = 0.2, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+   Maneuver 'Apply GOI' GOI(DefaultSC);
+   Achieve 'Achieve ECC' DC(DefaultSC.ECC = 0, {Tolerance = 0.1});
+EndTarget;  % For targeter DC
+GMAT DV = abs(TOI.Element1 + GOI.Element1);
+Report DefaultReportFile DV;
+Propagate DefaultProp(DefaultSC) {DefaultSC.Earth.Periapsis};
